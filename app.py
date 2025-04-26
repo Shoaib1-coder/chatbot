@@ -14,6 +14,7 @@ chat = model.start_chat()
 # Streamlit UI
 st.set_page_config(page_title="Visual Chatbot", layout="centered")
 st.title("Speak or Type to the Visual Chatbot")
+st.markdown("** SHOAIB**")
 st.markdown("Ask in **German**, **Arabic**, **Urdu**, or **English** by typing or speaking!")
 
 # Language detection function
