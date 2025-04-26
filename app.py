@@ -67,10 +67,10 @@ if input_method == "Type ":
     question = st.text_input(" Type your question:")
 else:
     st.markdown(" Record your voice and upload:")
-    uploaded_audio = st.file_uploader("Upload a .wav file", type=["wav"])
+    uploaded_audio = st.file_uploader("Upload a .mp3 file", type=["mp3"])
     if uploaded_audio:
         with st.spinner("Recognizing speech..."):
-            temp_audio_path = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+            temp_audio_path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
             temp_audio_path.write(uploaded_audio.read())
             temp_audio_path.close()
 
