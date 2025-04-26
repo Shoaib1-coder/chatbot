@@ -10,7 +10,7 @@ API_KEY = st.secrets["GEMINI_API_KEY"]
 
 # Initialize Gemini
 genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel(model_name="Gemini 2.0 Flash")  # Correct model call
+model = genai.GenerativeModel(model_name="gemini-2.0-flash")  # Correct model call
 chat = model.start_chat()
 
 # Streamlit UI
