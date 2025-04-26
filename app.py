@@ -10,7 +10,7 @@ API_KEY = st.secrets["GEMINI_API_KEY"]
 
 # Initialize Gemini
 genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel("models/gemini-pro")
+model = genai.GenerativeModel(model_name="gemini-pro")  # Correct model call
 chat = model.start_chat()
 
 # Streamlit UI
@@ -20,19 +20,25 @@ st.markdown("Ask in **German 🇩🇪, Arabic 🇸🇦, Urdu 🇵🇰, or Englis
 
 # Language detection function
 def detect_language(text):
-    if any(c in text for c in "اأإآءئبتثجحخدذرزسشصضطظعغفقكلمنهوىي"):
-        return "ar"  # Arabic or Urdu
-    elif any(c in text for c in "ءآؤئٹںھے"):
+    urdu_chars = set("ٹںھئےۓ")
+    arabic_chars = set("اأإآءئبتثجحخدذرزسشصضطظعغفقكلمنهوىي")
+
+    if any(c in text for c in urdu_chars):
         return "ur"
+    elif any(c in text for c in arabic_chars):
+        return "ar"
     elif any(c in text for c in "äöüß"):
-        return "de"  # German
+        return "de"
     else:
-        return "en"  # Default English
+        return "en"
 
 # Text-to-speech function
 def speak_text(text, lang_code):
     try:
-        tts = gTTS(text=text, lang=lang_code)
+        if lang_code in ["en", "de", "ar", "ur"]:
+            tts = gTTS(text=text, lang=lang_code)
+        else:
+            tts = gTTS(text=text, lang="en")  # fallback
         tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
         tts.save(tmp_file.name)
         return tmp_file.name
@@ -53,7 +59,7 @@ def recognize_speech_from_audio(audio_file):
         except sr.RequestError:
             return None
 
-# Choose input method
+# --- Input Section ---
 input_method = st.radio("Choose Input Method:", ["Type ✍️", "Speak 🎤"])
 question = ""
 
@@ -61,7 +67,7 @@ if input_method == "Type ✍️":
     question = st.text_input("💬 Type your question:")
 else:
     st.markdown("🎤 Record your voice and upload:")
-    uploaded_audio = st.file_uploader("Upload .wav file", type=["wav"])
+    uploaded_audio = st.file_uploader("Upload a .wav file", type=["wav"])
     if uploaded_audio:
         with st.spinner("Recognizing speech..."):
             temp_audio_path = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
@@ -77,7 +83,7 @@ else:
             else:
                 st.error("❌ Could not recognize speech. Please try again.")
 
-# Handle "Ask Gemini" button
+# --- Ask Gemini ---
 if st.button("Ask Gemini") and question:
     with st.spinner("Thinking... 🤔"):
         prompt = f"""
@@ -104,4 +110,3 @@ Question:
 
         except Exception as e:
             st.error(f"❌ Error: {e}")
-
