@@ -5,18 +5,16 @@ import speech_recognition as sr
 import tempfile
 import os
 
-
 API_KEY = st.secrets["GEMINI_API_KEY"]
-
 
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel(model_name="gemini-2.0-flash")  
 chat = model.start_chat()
 
 # Streamlit UI
-st.set_page_config(page_title=" Visual Chatbot", layout="centered")
-st.title(" Speak or Type to the Visual Chatbot ")
-st.markdown("Ask in **German** , **Arabic** , **Urdu**, or **English** by typing or speaking!")
+st.set_page_config(page_title="Visual Chatbot", layout="centered")
+st.title("Speak or Type to the Visual Chatbot")
+st.markdown("Ask in **German**, **Arabic**, **Urdu**, or **English** by typing or speaking!")
 
 # Language detection function
 def detect_language(text):
@@ -38,7 +36,7 @@ def speak_text(text, lang_code):
         if lang_code in ["en", "de", "ar", "ur"]:
             tts = gTTS(text=text, lang=lang_code)
         else:
-            tts = gTTS(text=text, lang="en")  
+            tts = gTTS(text=text, lang="en")
         tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
         tts.save(tmp_file.name)
         return tmp_file.name
@@ -46,11 +44,12 @@ def speak_text(text, lang_code):
         st.error(f"TTS Error: {e}")
         return None
 
-# Speech-to-text function
-def recognize_speech_from_audio(audio_file):
+# Speech-to-text function using the microphone
+def recognize_speech_from_mic():
     recognizer = sr.Recognizer()
-    with sr.AudioFile(audio_file) as source:
-        audio_data = recognizer.record(source)
+    with sr.Microphone() as source:
+        st.info("Say something...")
+        audio_data = recognizer.listen(source)
         try:
             text = recognizer.recognize_google(audio_data)
             return text
@@ -59,33 +58,25 @@ def recognize_speech_from_audio(audio_file):
         except sr.RequestError:
             return None
 
-
-input_method = st.radio("Choose Input Method:", ["Type ", "Speak "])
+input_method = st.radio("Choose Input Method:", ["Type", "Speak"])
 question = ""
 
-if input_method == "Type ":
-    question = st.text_input(" Type your question:")
+if input_method == "Type":
+    question = st.text_input("Type your question:")
 else:
-    st.markdown(" Record your voice and upload:")
-    uploaded_audio = st.file_uploader("Upload a .mp3 file", type=["mp3"])
-    if uploaded_audio:
-        with st.spinner("Recognizing speech..."):
-            temp_audio_path = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
-            temp_audio_path.write(uploaded_audio.read())
-            temp_audio_path.close()
+    st.markdown("Speak your question:")
+    if st.button("Start Recording"):
+        recognized_text = recognize_speech_from_mic()
 
-            recognized_text = recognize_speech_from_audio(temp_audio_path.name)
-            os.remove(temp_audio_path.name)
-
-            if recognized_text:
-                st.success(f" Recognized Text: {recognized_text}")
-                question = recognized_text
-            else:
-                st.error(" Could not recognize speech. Please try again.")
+        if recognized_text:
+            st.success(f"Recognized Text: {recognized_text}")
+            question = recognized_text
+        else:
+            st.error("Could not recognize speech. Please try again.")
 
 # --- Ask Gemini ---
 if st.button("Ask Question") and question:
-    with st.spinner("Thinking... "):
+    with st.spinner("Thinking..."):
         prompt = f"""
 You are a Visual AI chatbot assistant.
 Detect the language of the question (German, Arabic, Urdu, or English) and answer it intelligently in the same language.
@@ -98,7 +89,7 @@ Question:
             response = chat.send_message(prompt)
             answer = response.text.strip()
 
-            st.success(" Answer:")
+            st.success("Answer:")
             st.markdown(answer)
 
             lang_code = detect_language(answer)
@@ -109,4 +100,5 @@ Question:
                 os.remove(audio_file)
 
         except Exception as e:
-            st.error(f" Error: {e}")
+            st.error(f"Error: {e}")
+
