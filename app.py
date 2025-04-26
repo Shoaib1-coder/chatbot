@@ -5,18 +5,18 @@ import speech_recognition as sr
 import tempfile
 import os
 
-# Load API key from Streamlit secrets
+
 API_KEY = st.secrets["GEMINI_API_KEY"]
 
-# Initialize Gemini
+
 genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel(model_name="gemini-2.0-flash")  # Correct model call
+model = genai.GenerativeModel(model_name="gemini-2.0-flash")  
 chat = model.start_chat()
 
 # Streamlit UI
-st.set_page_config(page_title="🎤 Multilingual Chatbot", layout="centered")
-st.title("🌍 Speak or Type to the Multilingual Chatbot 🎙️")
-st.markdown("Ask in **German 🇩🇪, Arabic 🇸🇦, Urdu 🇵🇰, or English 🇺🇸** by typing or speaking!")
+st.set_page_config(page_title=" Visual Chatbot", layout="centered")
+st.title(" Speak or Type to the Visual Chatbot ")
+st.markdown("Ask in **German , Arabic , Urdu, or English ** by typing or speaking!")
 
 # Language detection function
 def detect_language(text):
@@ -38,7 +38,7 @@ def speak_text(text, lang_code):
         if lang_code in ["en", "de", "ar", "ur"]:
             tts = gTTS(text=text, lang=lang_code)
         else:
-            tts = gTTS(text=text, lang="en")  # fallback
+            tts = gTTS(text=text, lang="en")  
         tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
         tts.save(tmp_file.name)
         return tmp_file.name
@@ -59,14 +59,14 @@ def recognize_speech_from_audio(audio_file):
         except sr.RequestError:
             return None
 
-# --- Input Section ---
-input_method = st.radio("Choose Input Method:", ["Type ✍️", "Speak 🎤"])
+
+input_method = st.radio("Choose Input Method:", ["Type ", "Speak "])
 question = ""
 
-if input_method == "Type ✍️":
-    question = st.text_input("💬 Type your question:")
+if input_method == "Type ":
+    question = st.text_input(" Type your question:")
 else:
-    st.markdown("🎤 Record your voice and upload:")
+    st.markdown(" Record your voice and upload:")
     uploaded_audio = st.file_uploader("Upload a .wav file", type=["wav"])
     if uploaded_audio:
         with st.spinner("Recognizing speech..."):
@@ -78,16 +78,16 @@ else:
             os.remove(temp_audio_path.name)
 
             if recognized_text:
-                st.success(f"✅ Recognized Text: {recognized_text}")
+                st.success(f" Recognized Text: {recognized_text}")
                 question = recognized_text
             else:
-                st.error("❌ Could not recognize speech. Please try again.")
+                st.error(" Could not recognize speech. Please try again.")
 
 # --- Ask Gemini ---
-if st.button("Ask Gemini") and question:
-    with st.spinner("Thinking... 🤔"):
+if st.button("Ask Question") and question:
+    with st.spinner("Thinking... "):
         prompt = f"""
-You are a multilingual assistant.
+You are a Visual AI chatbot assistant.
 Detect the language of the question (German, Arabic, Urdu, or English) and answer it intelligently in the same language.
 Do not translate — give a real answer based on meaning.
 
@@ -98,7 +98,7 @@ Question:
             response = chat.send_message(prompt)
             answer = response.text.strip()
 
-            st.success("✅ Gemini's Answer:")
+            st.success(" Answer:")
             st.markdown(answer)
 
             lang_code = detect_language(answer)
@@ -109,4 +109,4 @@ Question:
                 os.remove(audio_file)
 
         except Exception as e:
-            st.error(f"❌ Error: {e}")
+            st.error(f" Error: {e}")
