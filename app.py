@@ -8,7 +8,7 @@ import os
 
 
 st.set_page_config(page_title="Visual Chatbot", layout="centered")
-st.write("**Author**: **Muhammad Shoaib**")
+st.markdown("<h2 style='color: #4CAF50;'>Author: <span style='font-size: 24px;'>John Doe</span></h2>", unsafe_allow_html=True)
 st.title("Visual Chatbot")
 st.markdown("Ask in **German**, **Arabic**, **Urdu**, or **English** by typing or uploading an audio file")
 
@@ -113,6 +113,6 @@ Question:
 
         except Exception as e:
             st.error(f" Error: {e}")
-st.markdown("**Author**")
+
 
 
