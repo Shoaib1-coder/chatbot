@@ -6,20 +6,20 @@ from pydub import AudioSegment
 import tempfile
 import os
 
+# --- Streamlit page config ---
+st.set_page_config(page_title="Visual Chatbot", layout="centered")
+st.title("🎤 Visual Chatbot")
+st.markdown("Ask in **German 🇩🇪**, **Arabic 🇸🇦**, **Urdu 🇵🇰**, or **English 🇺🇸** by typing or uploading an audio file!")
 
-st.set_page_config(page_title=" Visual Chatbot", layout="centered")
-st.title(" **Visual Chatbot** ")
-st.markdown("Ask in **German** , **Arabic**, **Urdu** , or **English** by typing or uploading an MP3 file!")
-
-
+# --- API Key ---
 API_KEY = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=API_KEY)
 
-
+# --- Initialize Gemini model ---
 model = genai.GenerativeModel(model_name="gemini-2.0-flash")
 chat = model.start_chat()
 
-
+# --- Helper Functions ---
 def detect_language(text):
     urdu_chars = set("ٹںھئےۓ")
     arabic_chars = set("اأإآءئبتثجحخدذرزسشصضطظعغفقكلمنهوىي")
@@ -34,10 +34,7 @@ def detect_language(text):
 
 def speak_text(text, lang_code):
     try:
-        if lang_code in ["en", "de", "ar", "ur"]:
-            tts = gTTS(text=text, lang=lang_code)
-        else:
-            tts = gTTS(text=text, lang="en")
+        tts = gTTS(text=text, lang=lang_code if lang_code in ["en", "de", "ar", "ur"] else "en")
         tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
         tts.save(tmp_file.name)
         return tmp_file.name
@@ -45,23 +42,26 @@ def speak_text(text, lang_code):
         st.error(f"TTS Error: {e}")
         return None
 
-def recognize_speech_from_mp3(uploaded_file):
+def recognize_speech(uploaded_file):
     try:
-        temp_mp3 = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
-        temp_mp3.write(uploaded_file.read())
-        temp_mp3.flush()
-        
-        # Convert MP3 to WAV
-        sound = AudioSegment.from_mp3(temp_mp3.name)
+        # Save the uploaded file temporarily
+        temp_input = tempfile.NamedTemporaryFile(delete=False, suffix=".input")
+        temp_input.write(uploaded_file.read())
+        temp_input.flush()
+
+        # Convert audio to wav using pydub
+        sound = AudioSegment.from_file(temp_input.name)
         temp_wav = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
         sound.export(temp_wav.name, format="wav")
-        
+
+        # Recognize speech
         recognizer = sr.Recognizer()
         with sr.AudioFile(temp_wav.name) as source:
             audio_data = recognizer.record(source)
             text = recognizer.recognize_google(audio_data)
-        
-        os.remove(temp_mp3.name)
+
+        # Clean up
+        os.remove(temp_input.name)
         os.remove(temp_wav.name)
 
         return text
@@ -69,30 +69,30 @@ def recognize_speech_from_mp3(uploaded_file):
         st.error(f"Speech Recognition Failed: {e}")
         return None
 
-
-input_method = st.radio("Choose Input Method:", ["Type ", "Upload MP3 "])
+# --- Input Method ---
+input_method = st.radio("Choose Input Method:", ["Type ✍️", "Upload Audio 🎵"])
 question = ""
 
-if input_method == "Type ":
-    question = st.text_input(" Type your question:")
+if input_method == "Type ✍️":
+    question = st.text_input("Type your question:")
 else:
-    uploaded_audio = st.file_uploader("Upload an MP3 file", type=["mp3"])
+    uploaded_audio = st.file_uploader("Upload an audio file (M4A, MP3, MP4, WAV)", type=["m4a", "mp3", "mp4", "wav"])
     if uploaded_audio:
         with st.spinner("Recognizing speech..."):
-            recognized_text = recognize_speech_from_mp3(uploaded_audio)
+            recognized_text = recognize_speech(uploaded_audio)
             if recognized_text:
-                st.success(f" Recognized Text: {recognized_text}")
+                st.success(f"✅ Recognized Text: {recognized_text}")
                 question = recognized_text
             else:
-                st.error(" Could not recognize speech. Please try again.")
+                st.error("❌ Could not recognize speech. Please try again.")
 
-
-if st.button("Ask ") and question:
-    with st.spinner("Thinking... "):
+# --- Ask Gemini ---
+if st.button("Ask 💬") and question:
+    with st.spinner("Thinking... 🤔"):
         prompt = f"""
 You are a Visual AI Assistant.
-Detect the language of the question (German, Arabic, Urdu, or English) and answer it in the same language.
-
+Detect the language of the question (German, Arabic, Urdu, or English) and answer it intelligently in the same language.
+Don't translate, just answer naturally.
 
 Question:
 {question}
@@ -101,18 +101,18 @@ Question:
             response = chat.send_message(prompt)
             answer = response.text.strip()
 
-            st.success(" Answer:")
+            st.success("✅ Answer:")
             st.markdown(answer)
 
-           
-            language_target = detect_language(answer)
-            audio_file = speak_text(answer, language_target)
+            lang_code = detect_language(answer)
+            audio_file = speak_text(answer, lang_code)
 
             if audio_file:
                 st.audio(audio_file, format="audio/mp3")
                 os.remove(audio_file)
 
         except Exception as e:
-            st.error(f" Error: {e}")
+            st.error(f"❌ Error: {e}")
+
 
 
