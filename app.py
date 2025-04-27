@@ -8,6 +8,7 @@ import os
 
 
 st.set_page_config(page_title="Visual Chatbot", layout="centered")
+st.write("Author: **Muhammad Shoaib**")
 st.title("Visual Chatbot")
 st.markdown("Ask in **German**, **Arabic**, **Urdu**, or **English** by typing or uploading an audio file")
 
