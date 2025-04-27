@@ -8,8 +8,8 @@ import os
 
 
 st.set_page_config(page_title="Visual Chatbot", layout="centered")
-st.title(" Visual Chatbot")
-st.markdown("Ask in **German**, **Arabic**, **Urdu **, or **English ** by typing or uploading an audio file")
+st.title("Visual Chatbot")
+st.markdown("Ask in **German**, **Arabic**, **Urdu**, or **English** by typing or uploading an audio file")
 
 
 API_KEY = st.secrets["GEMINI_API_KEY"]
@@ -112,6 +112,6 @@ Question:
 
         except Exception as e:
             st.error(f" Error: {e}")
-
+st.markdown("**Author**")
 
 
