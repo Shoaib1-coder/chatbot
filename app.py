@@ -11,7 +11,7 @@ import os
 st.set_page_config(page_title="Multilingual Visual Chatbot", layout="centered")
 st.markdown("<h2 style='color: red;'>Author: <span style='font-size: 24px;'>Muhammad Shoaib</span></h2>", unsafe_allow_html=True)
 st.title("🌐 Visual Chatbot")
-st.markdown("Ask in **English**, **German**, **Arabic**, **Urdu**, **Chinese**, or **Hindi** by typing or uploading an audio file.")
+st.markdown(" Typing or uploading an audio file in multiple language and answer in Text and Audio .")
 
 # Configure Gemini API
 API_KEY = st.secrets["GEMINI_API_KEY"]
