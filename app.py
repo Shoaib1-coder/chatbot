@@ -10,8 +10,8 @@ import os
 # Streamlit page config
 st.set_page_config(page_title="Multilingual Visual Chatbot", layout="centered")
 st.markdown("<h2 style='color: red;'>Author: <span style='font-size: 24px;'>Muhammad Shoaib</span></h2>", unsafe_allow_html=True)
-st.title("🌐 Visual Chatbot")
-st.markdown(" Typing or uploading an audio file in multiple language and answer in Text and Audio .")
+st.title("🌐AI Chatbot")
+st.markdown("Type or upload an audio file in multiple languages and get answers in text and audio.")
 
 # Configure Gemini API
 API_KEY = st.secrets["GEMINI_API_KEY"]
@@ -19,30 +19,9 @@ genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel(model_name="gemini-2.0-flash")
 chat = model.start_chat()
 
-# Language map for gTTS
-LANGUAGE_CODES = {
-    "en": "English",
-    "de": "German",
-    "ar": "Arabic",
-    "ur": "Urdu",
-    "zh-cn": "Chinese",
-    "hi": "Hindi"
-}
-
-SUPPORTED_LANG_CODES = list(LANGUAGE_CODES.keys())
-
-def detect_language(text):
-    try:
-        lang = detect(text)
-        if lang in SUPPORTED_LANG_CODES:
-            return lang
-        return "en"  # default fallback
-    except:
-        return "en"
-
 def speak_text(text, lang_code):
     try:
-        tts = gTTS(text=text, lang=lang_code if lang_code in SUPPORTED_LANG_CODES else "en")
+        tts = gTTS(text=text, lang=lang_code)
         tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
         tts.save(tmp_file.name)
         return tmp_file.name
@@ -75,9 +54,15 @@ def recognize_speech(uploaded_file):
 # Input method
 input_method = st.radio("Choose Input Method:", ["Type", "Upload Audio"])
 question = ""
+detected_lang = "en"
 
 if input_method == "Type":
     question = st.text_input("Type your question:")
+    if question:
+        try:
+            detected_lang = detect(question)
+        except:
+            detected_lang = "en"
 else:
     uploaded_audio = st.file_uploader("Upload an audio file (M4A, MP3, MP4, WAV)", type=["m4a", "mp3", "mp4", "wav"])
     if uploaded_audio:
@@ -86,6 +71,10 @@ else:
             if recognized_text:
                 st.success(f"🗣️ Recognized Text: {recognized_text}")
                 question = recognized_text
+                try:
+                    detected_lang = detect(question)
+                except:
+                    detected_lang = "en"
             else:
                 st.error("❌ Could not recognize speech. Please try again.")
 
@@ -103,10 +92,7 @@ Question: {question}
             st.success("🤖 Answer:")
             st.markdown(answer)
 
-            lang_code = detect_language(answer)
-            st.markdown(f"🌍 Detected Language: **{LANGUAGE_CODES.get(lang_code, 'Unknown')}**")
-
-            audio_file = speak_text(answer, lang_code)
+            audio_file = speak_text(answer, detected_lang)
             if audio_file:
                 st.audio(audio_file, format="audio/mp3")
                 os.remove(audio_file)
