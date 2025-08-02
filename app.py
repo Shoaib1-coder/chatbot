@@ -80,8 +80,8 @@ if st.button("Ask Question") and question:
     with st.spinner("Thinking..."):
         prompt = f"""
 You are a Visual AI chatbot assistant.
-Detect the language of the question (German, Arabic, Urdu, or English) and answer it intelligently in the same language.
-Do not translate — give a real answer based on meaning.
+Detect the language of the question (German, Arabic, Urdu, or English)  Do **not** mention or explain the detected language and answer it intelligently in the same language.
+Do not translate — give a real answer based on meaning. 
 
 Question:
 {question}
