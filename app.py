@@ -123,11 +123,7 @@ Question:
             st.success("Answer:")
             st.markdown(answer)
 
-            # Detect language of the answer
-            lang_code = detect_language(answer)
-            st.caption(f"🔍 Detected Language Code: {lang_code}")
-
-            # Convert answer to speech
+           # Convert answer to speech
             audio_file = speak_text(answer, lang_code)
 
             # Play audio if generated successfully
