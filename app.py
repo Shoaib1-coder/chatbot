@@ -122,7 +122,7 @@ Question:
             # Display the answer
             st.success("Answer:")
             st.markdown(answer)
-
+            lang_code = detect_language(answer)
            # Convert answer to speech
             audio_file = speak_text(answer, lang_code)
 
