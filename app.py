@@ -85,10 +85,11 @@ else:
 # Send to Gemini and speak answer
 if st.button("Ask") and question:
     with st.spinner("Thinking..."):
-       prompt = f"""You are a multilingual AI assistant. Answer the following question in the language code '{detected_lang}'.
+      prompt = f"""You are a multilingual AI assistant. Answer the following question in the same language it is asked, without explaining the detected language.
 
-       Question: {question}
-         """
+          Question: {question}
+                  """
+
 
 
     try:
