@@ -91,7 +91,7 @@ if st.button("Ask") and question:
          """
 
 
-        try:
+    try:
             response = chat.send_message(prompt)
             answer = response.text.strip()
 
@@ -102,7 +102,7 @@ if st.button("Ask") and question:
             if audio_file:
                 st.audio(audio_file, format="audio/mp3")
                 os.remove(audio_file)
-        except Exception as e:
+    except Exception as e:
             st.error(f"Error: {e}")
 
 
