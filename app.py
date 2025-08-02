@@ -81,10 +81,11 @@ else:
 # Send to Gemini and speak answer
 if st.button("Ask") and question:
     with st.spinner("Thinking..."):
-        prompt = f"""You are a multilingual AI assistant. Detect the language of the question and answer it in the same language.
+        prompt = f"""You are a multilingual AI assistant. Answer the following question in the same language it is asked, without explaining the detected language.
 
-Question: {question}
-"""
+        Question: {question}
+          """
+
         try:
             response = chat.send_message(prompt)
             answer = response.text.strip()
