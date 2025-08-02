@@ -61,8 +61,12 @@ if input_method == "Type":
     if question:
         try:
             detected_lang = detect(question)
+            # Fallback for short questions
+            if len(question.split()) <= 3 and detected_lang != "en":
+                detected_lang = "en"
         except:
             detected_lang = "en"
+
 else:
     uploaded_audio = st.file_uploader("Upload an audio file (M4A, MP3, MP4, WAV)", type=["m4a", "mp3", "mp4", "wav"])
     if uploaded_audio:
@@ -81,10 +85,11 @@ else:
 # Send to Gemini and speak answer
 if st.button("Ask") and question:
     with st.spinner("Thinking..."):
-        prompt = f"""You are a multilingual AI assistant. Answer the following question in the same language it is asked, without explaining the detected language.
+       prompt = f"""You are a multilingual AI assistant. Answer the following question in the language code '{detected_lang}'.
 
-        Question: {question}
-          """
+       Question: {question}
+         """
+
 
         try:
             response = chat.send_message(prompt)
